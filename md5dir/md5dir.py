@@ -144,6 +144,7 @@ class Directory:
                 f.write(md5.hexdigest() + "\n")
 
         else:
+            print() # faut une ligne vide pour espacer
             print(md5.hexdigest())
 
 
