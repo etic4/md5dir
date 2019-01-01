@@ -10,6 +10,8 @@ from typing import IO, Optional, Generator, Tuple, List, Any, AnyStr
 
 import click
 
+__all__ = ["HashList", "Directory", "cli"]
+
 APPNAME = "md5dir"
 
 
