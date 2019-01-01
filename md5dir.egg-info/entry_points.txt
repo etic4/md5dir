@@ -1,3 +1,0 @@
-[console_scripts]
-md5dir = md5dir.md5dir:cli
-
