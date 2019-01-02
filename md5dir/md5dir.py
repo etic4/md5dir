@@ -68,7 +68,8 @@ class HashList:
 
 
     def lines(self) -> List[str]:
-        """Retourne les lignes chemin+espaces+md5 justifiées. Pratique pour générer une diff et utilisé pour écrire dans un fichier.
+        """Retourne les lignes chemin+espaces+md5 justifiées. Pratique pour générer une diff et
+         utilisé pour écrire dans un fichier.
         """
         _lines = list()
 
@@ -161,7 +162,8 @@ class Directory:
 
 
     def md5_list(self, destfile: Optional[str], include_hidden: bool) -> None:
-        """Ècrit la liste des éléments d'un répertoire avec les sommes md5 associées, soit sur la sortie standard soit dans un fichier.
+        """Ècrit la liste des éléments d'un répertoire avec les sommes md5 associées, soit sur
+        la sortie standard soit dans un fichier.
         """
         hashlist = HashList(self.dirpath)
 
@@ -200,19 +202,26 @@ class Directory:
 
 @click.group()
 def cli() -> None:
-    """Ce module comprend un utilitaire en ligne de commande qui permet de calculer la somme md5 du contenu d'un répertoire (commande 'md5'), ainsi que de comparer deux listes de sommes (commande 'compare').
-    La commande 'md5' peut retourner soit la somme md5 de l'ensemble des fichiers inclus dans le dossier, soit un fichier texte comprenant les sommes de chacun des fichiers inclus dans le dossier. La commande 'compare' compare deux fichiers de hash calculés par la commande 'hash'.
+    """Ce module comprend un utilitaire en ligne de commande qui permet de calculer la somme md5
+    du contenu d'un répertoire (commande 'md5'), ainsi que de comparer deux listes de sommes
+    (commande 'compare').
+    La commande 'md5' peut retourner soit la somme md5 de l'ensemble des fichiers inclus dans le
+    dossier, soit un fichier texte comprenant les sommes de chacun des fichiers inclus dans le
+    dossier. La commande 'compare' compare deux fichiers de hash calculés par la commande 'hash'.
     """
     pass
 
 
 @cli.command(short_help="Génère la somme md5 d'un répertoire")
 @click.argument("dirpath", type=click.Path(exists=True, file_okay=False, resolve_path=True))
-@click.option("--unique", "-u", is_flag=True, help="Retourne la somme md5 de l'ensemble des fichiers, plutôt que de retourner une somme md5 pour chaque fichier contenu dans le dossier et les sous-dossiers.")
+@click.option("--unique", "-u", is_flag=True, help="""Retourne la somme md5 de l'ensemble des
+fichiers, plutôt que de retourner une somme md5 pour chaque fichier contenu dans le dossier et les
+sous-dossiers.""")
 @click.option("--outfile", "-o", help="Écrit le résultat dans un fichier.")
 @click.option("--include_hidden", "-h", is_flag=True, help="Inclus les fichiers cachés")
 def md5(dirpath: str, unique: bool, outfile: Optional[str]=None, include_hidden: bool=False) -> None:
-    """Retourne soit la somme md5 de tous les fichiers inclus dans le dossier, soit un fichier texte comprenant les sommes md5 de tous les fichiers inclus dans le dossier.
+    """Retourne soit la somme md5 de tous les fichiers inclus dans le dossier, soit un fichier
+    texte comprenant les sommes md5 de tous les fichiers inclus dans le dossier.
     """
 
     if not os.path.isdir(dirpath):
