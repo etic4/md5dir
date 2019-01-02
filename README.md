@@ -1,10 +1,10 @@
 # md5dir - Calculer la somme md5 d'un répertoire
 
-Ce module comprend un utilitaire en ligne de commande qui permet de calculer la somme md5 du contenu d'un répertoire (commande 'md5'), ainsi que de comparer deux listes de sommes (commande 'compare').
+Ce module comprend un utilitaire en ligne de commande qui permet de calculer la somme md5 du contenu d'un répertoire (commande `md5`), ainsi que de comparer deux listes de sommes (commande `compare`).
 
-La commande 'md5' peut retourner soit la somme md5 de l'ensemble des fichiers inclus dans le dossier, soit un fichier texte comprenant les sommes de chacun des fichiers inclus dans le dossier.
+La commande `md5` peut retourner soit la somme md5 de l'ensemble des fichiers inclus dans le dossier, soit un fichier texte comprenant les sommes de chacun des fichiers inclus dans le dossier.
 
-La commande 'compare' compare deux fichiers de sommes calculés par la commande 'md5'.
+La commande `compare` compare deux fichiers de sommes calculés par la commande `md5`.
 
 Le module peut être installé avec pip:
 
