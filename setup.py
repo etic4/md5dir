@@ -13,6 +13,7 @@ setup(
     author_email="zazor@riseup.net",
     description="Compute the md5 sum of a directory",
     long_description=open('README.md').read(),
+    long_description_content_type="text/markdown",
     licence="WTFPL",
     include_package_data=True,
     url='http://github.com/machinbrol/md5dir',
