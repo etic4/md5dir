@@ -11,11 +11,12 @@ setup(
     packages=find_packages(),
     author="MachinBrol",
     author_email="zazor@riseup.net",
-    description="Calcule la somme md5 d'un répertoire",
+    description="Compute the md5 sum of a directory",
     long_description=open('README.md').read(),
     licence="WTFPL",
     include_package_data=True,
     url='http://github.com/machinbrol/md5dir',
+    install_requires=["click"],
     classifiers=[
         "Programming Language :: Python",
         "Natural Language :: French",
