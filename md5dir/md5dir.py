@@ -29,6 +29,8 @@ class HashList:
 
 
     def read_file(self, filepath: str) -> None:
+        """Lit un fichier et le parse.
+        """
         hashs = list()
 
         abs_filepath = os.path.abspath(filepath)
@@ -53,6 +55,8 @@ class HashList:
 
 
     def write_file(self, destfile: str) -> None:
+        """Ècrit la liste de noms de fichier et md5 associés dans un fichier
+        """
         abs_destfile = os.path.abspath(destfile)
 
         with open(destfile, "w") as f:
@@ -77,6 +81,8 @@ class HashList:
 
 
     def compare(self, otherpath: str) -> None:
+        """Compare cette liste de sommes md5 avec un autre fichier de sommes md5
+        """
         other = HashList()
         # Checker que otherpath existe
         other.read_file(otherpath)
@@ -89,6 +95,8 @@ class HashList:
 
 
     def diff(self, other: Any) -> str:
+        """Retourn la diff de cette liste avec une autre
+        """
         if not isinstance(other, HashList):
             raise TypeError("N'est pas une instance de {_type}: {other}".format(_type=self.__class__.__name__, other=other))
 
@@ -106,6 +114,8 @@ class HashList:
 
 
     def _justify(self, md5_list: List[Tuple[str, str]], min_dist: int=5) -> List[Tuple[str, str, str]]:
+        """Retourne une liste comprenant des expaces permettant la justification
+        """
         justified = list()
         longest = 0
 
@@ -128,6 +138,8 @@ class Directory:
 
 
     def md5(self, destfile: Optional[str], include_hidden: bool) -> None:
+        """Retourne la somme md5 d'un répertoire, soit sur la sortie standard soit dans un fichier
+        """
         md5 = hashlib.md5()
 
         for filepath, relfilepath in self._get_filepaths(include_hidden):
@@ -149,6 +161,8 @@ class Directory:
 
 
     def md5_list(self, destfile: Optional[str], include_hidden: bool) -> None:
+        """Ècrit la liste des éléments d'un répertoire avec les sommes md5 associées, soit sur la sortie standard soit dans un fichier.
+        """
         hashlist = HashList(self.dirpath)
 
         for filepath, relfilepath in self._get_filepaths(include_hidden):

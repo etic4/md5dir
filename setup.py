@@ -13,6 +13,7 @@ setup(
     author_email="zazor@riseup.net",
     description="Calcule la somme md5 d'un répertoire",
     long_description=open('README.md').read(),
+    licence="WTFPL",
     include_package_data=True,
     url='http://github.com/machinbrol/md5dir',
     classifiers=[
