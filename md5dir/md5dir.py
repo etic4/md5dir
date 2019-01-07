@@ -211,7 +211,7 @@ def md5(dirpath: str, unique: bool, outfile: Optional[str]=None, include_hidden:
         if outfile:
             hashlist.write_file(outfile)
         else:
-            print("\Sommes md5 de {dirpath}:\n".format(dirpath=dirpath))
+            print("Sommes md5 de {dirpath}:\n".format(dirpath=dirpath))
             for line in hashlist.lines():
                 print(line)
 
@@ -237,7 +237,11 @@ def md5(dirpath: str, unique: bool, outfile: Optional[str]=None, include_hidden:
 def compare(dirpath1: str, dirpath2: str, unique: bool=False, outfile: str=None) -> None:
     """Compare les sommes md5 de chacun des fichiers et sous-dossiers de deux répertoires. Avec ´--unique´ ou ´-u´, ne compare que la somme md5 unique de chacun des répertoire comparé.
     """
-
+    for pth in [dirpath1, dirpath2]:
+        if not os.path.isdir(pth):
+            print("N'est pas un répertoire: {}".format(pth))
+            return
+            
     first = Directory(dirpath1).md5_list()
     second = Directory(dirpath2).md5_list()
 
