@@ -87,7 +87,7 @@ class HashList:
         if self == other:
             return "Les sommes md5 sont identiques."
         else:
-            txt = "Les sommes md5 sont différentes!"
+            txt = "Les sommes md5 sont différentes!\n"
             txt += self.diff(other)
 
             return txt
