@@ -194,7 +194,7 @@ def cli() -> None:
 
 
 @cli.command(short_help="Calcule la somme md5 d'un répertoire")
-@click.argument("dirpath", type=click.Path(exists=True, file_okay=False, resolve_path=True))
+@click.argument("dirpath")
 @click.option("--unique", "-u", is_flag=True, help="""Retourne la somme md5 de l'ensemble des fichiers, plutôt que de retourner une somme md5 pour chaque fichier contenu dans le dossier et les sous-dossiers.""")
 @click.option("--outfile", "-o", help="Écrit le résultat dans un fichier.")
 @click.option("--include_hidden", "-h", is_flag=True, help="Inclus les fichiers cachés")
@@ -204,7 +204,8 @@ def md5(dirpath: str, unique: bool, outfile: Optional[str]=None, include_hidden:
     """
 
     if not os.path.isdir(dirpath):
-        print("N'est pas un répertoire: {dirpath}\n".format(dirpath))
+        print("N'est pas un répertoire: {dirpath}\n".format(dirpath=dirpath))
+        return
 
     if not unique:
         hashlist = Directory(dirpath).md5_list(include_hidden)
@@ -241,7 +242,7 @@ def compare(dirpath1: str, dirpath2: str, unique: bool=False, outfile: str=None)
         if not os.path.isdir(pth):
             print("N'est pas un répertoire: {}".format(pth))
             return
-            
+
     first = Directory(dirpath1).md5_list()
     second = Directory(dirpath2).md5_list()
 
