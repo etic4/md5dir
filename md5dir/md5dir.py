@@ -5,7 +5,7 @@
 
 import os
 import hashlib
-from difflib import Differ
+from difflib import unified_diff
 from typing import IO, Optional, Generator, Tuple, List, Any, AnyStr
 
 import click
@@ -81,28 +81,27 @@ class HashList:
         return _lines
 
 
-    def compare(self, other: HashList) -> str:
+    def compare(self, other: Any) -> str:
         """Compare cette liste avec une autre
         """
         if self == other:
             return "Les sommes md5 sont identiques."
         else:
-            txt = "Les sommes md5 sont différentes! Différences avec {otherpath} :\n".format(otherpath=other.dirpath)
+            txt = "Les sommes md5 sont différentes!"
             txt += self.diff(other)
 
             return txt
 
 
-    def diff(self, other: HashList) -> str:
+    def diff(self, other: Any) -> str:
         """Retourn la diff de cette liste avec une autre
         """
-        diff = Differ()
-        diff_text = "\n".join([line for line in diff.compare(self.lines(), other.lines())])
+        diff_text = "\n".join([line for line in unified_diff(self.lines(), other.lines(), fromfile=self.dirpath, tofile=other.dirpath, n=0)])
 
         return diff_text
 
 
-    def __eq__(self, other: HashList) -> bool:
+    def __eq__(self, other: Any) -> bool:
         self.hashlist.sort()
         other.hashlist.sort()
 
@@ -133,26 +132,29 @@ class Directory:
         self.dirpath = os.path.abspath(dirpath)
 
 
-    def md5(self, include_hidden: bool=False) -> str:
+    def md5(self, include_hidden: bool=False, verbose: bool=False) -> str:
         """Retourne la somme md5 d'un répertoire.
         """
         md5 = hashlib.md5()
 
         for filepath, relfilepath in self._get_filepaths(include_hidden):
-            print("Ajout de la somme md5 de {relfilepath}".format(relfilepath=relfilepath))
+            if verbose:
+                print("Ajout de la somme md5 de {relfilepath}".format(relfilepath=relfilepath))
+
             with open(filepath, "rb") as fb:
                 md5.update(fb.read())
 
         return md5.hexdigest()
 
 
-    def md5_list(self, include_hidden: bool=False) -> HashList:
+    def md5_list(self, include_hidden: bool=False, verbose: bool=False) -> HashList:
         """Retourne la liste des éléments d'un répertoire avec les sommes md5 associées.
         """
         hashlist = HashList(self.dirpath)
 
         for filepath, relfilepath in self._get_filepaths(include_hidden):
-            print("Calcul de la somme md5 de {relfilepath}".format(relfilepath=relfilepath))
+            if verbose:
+                print("Calcul de la somme md5 de {relfilepath}".format(relfilepath=relfilepath))
             with open(filepath, "rb") as fb:
                 md5 = hashlib.md5(fb.read()).hexdigest()
 
@@ -180,24 +182,23 @@ class Directory:
 # ################################
 
 @click.group()
+@click.help_option("--help", help="Affiche ce message et quitte.", is_flag=True, is_eager=True)
 def cli() -> None:
     """Ce module comprend un utilitaire en ligne de commande qui permet de calculer la somme md5
-    du contenu d'un répertoire (commande 'md5'), ainsi que de comparer deux listes de sommes
-    (commande 'compare').
+    du contenu d'un répertoire (commande 'md5'), ainsi que de comparer les sommes md5 de deux répertoires (commande 'compare').
     La commande 'md5' peut retourner soit la somme md5 de l'ensemble des fichiers inclus dans le
     dossier, soit un fichier texte comprenant les sommes de chacun des fichiers inclus dans le
-    dossier. La commande 'compare' compare deux fichiers de hash calculés par la commande 'hash'.
+    dossier.
     """
     pass
 
 
-@cli.command(short_help="Génère la somme md5 d'un répertoire")
+@cli.command(short_help="Calcule la somme md5 d'un répertoire")
 @click.argument("dirpath", type=click.Path(exists=True, file_okay=False, resolve_path=True))
-@click.option("--unique", "-u", is_flag=True, help="""Retourne la somme md5 de l'ensemble des
-fichiers, plutôt que de retourner une somme md5 pour chaque fichier contenu dans le dossier et les
-sous-dossiers.""")
+@click.option("--unique", "-u", is_flag=True, help="""Retourne la somme md5 de l'ensemble des fichiers, plutôt que de retourner une somme md5 pour chaque fichier contenu dans le dossier et les sous-dossiers.""")
 @click.option("--outfile", "-o", help="Écrit le résultat dans un fichier.")
 @click.option("--include_hidden", "-h", is_flag=True, help="Inclus les fichiers cachés")
+@click.help_option("--help", help="Affiche ce message et quitte.", is_flag=True, is_eager=True)
 def md5(dirpath: str, unique: bool, outfile: Optional[str]=None, include_hidden: bool=False) -> None:
     """Retourne la somme md5 de chacun des fichiers et sous-dossiers inclus dans le dossier ´dirpath´. Avec ´--unique´ ou ´-u´, retourne une seule somme md5 pour tout le contenu d'un répertoire.
     """
@@ -227,12 +228,11 @@ def md5(dirpath: str, unique: bool, outfile: Optional[str]=None, include_hidden:
 @cli.command(short_help="Comparer les sommes md5 de deux répertoires.")
 @click.argument("dirpath1")
 @click.argument("dirpath2")
-@click.option("--unique", "-u", is_flag=True, help="""Compare la somme md5 de l'ensemble des
-fichiers, plutôt que de comparer les sommes md5 de chaque fichier contenu dans le dossier et les
-sous-dossiers.""")
+@click.option("--unique", "-u", is_flag=True, help="""Compare la somme md5 de l'ensemble des fichiers, plutôt que de comparer les sommes md5 de chaque fichier contenu dans le dossier et les sous-dossiers.""")
 @click.option("--outfile", "-o", help="Écrit le résultat dans un fichier.")
+@click.help_option("--help", help="Affiche ce message et quitte.", is_flag=True, is_eager=True)
 def compare(dirpath1: str, dirpath2: str, unique: bool=False, outfile: str=None) -> None:
-    """Compare les sommes md5 du contenu de deux répertoires. Avec ´--unique´ ou ´-u´, ne génère qu'une somme md5 pour chaque répertoire comparé.
+    """Compare les sommes md5 de chacun des fichiers et sous-dossiers de deux répertoires. Avec ´--unique´ ou ´-u´, ne compare que la somme md5 unique de chacun des répertoire comparé.
     """
 
     first = Directory(dirpath1).md5_list()
