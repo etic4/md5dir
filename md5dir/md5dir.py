@@ -81,33 +81,28 @@ class HashList:
         return _lines
 
 
-    def compare(self, otherpath: str) -> None:
-        """Compare cette liste de sommes md5 avec un autre fichier de sommes md5
+    def compare(self, other: HashList) -> str:
+        """Compare cette liste avec une autre
         """
-        other = HashList()
-        # Checker que otherpath existe
-        other.read_file(otherpath)
-
         if self == other:
-            print("Les fichiers sont identiques")
+            return "Les sommes md5 sont identiques."
         else:
-            print("Les fichiers de sommes md5 sont différents! Différences avec {otherpath} :\n".format(otherpath=otherpath))
-            print(self.diff(other))
+            txt = "Les sommes md5 sont différentes! Différences avec {otherpath} :\n".format(otherpath=other.dirpath)
+            txt += self.diff(other)
+
+            return txt
 
 
-    def diff(self, other: Any) -> str:
+    def diff(self, other: HashList) -> str:
         """Retourn la diff de cette liste avec une autre
         """
-        if not isinstance(other, HashList):
-            raise TypeError("N'est pas une instance de {_type}: {other}".format(_type=self.__class__.__name__, other=other))
-
         diff = Differ()
         diff_text = "\n".join([line for line in diff.compare(self.lines(), other.lines())])
 
         return diff_text
 
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: HashList) -> bool:
         self.hashlist.sort()
         other.hashlist.sort()
 
@@ -138,8 +133,8 @@ class Directory:
         self.dirpath = os.path.abspath(dirpath)
 
 
-    def md5(self, destfile: Optional[str], include_hidden: bool) -> None:
-        """Retourne la somme md5 d'un répertoire, soit sur la sortie standard soit dans un fichier
+    def md5(self, include_hidden: bool=False) -> str:
+        """Retourne la somme md5 d'un répertoire.
         """
         md5 = hashlib.md5()
 
@@ -148,22 +143,11 @@ class Directory:
             with open(filepath, "rb") as fb:
                 md5.update(fb.read())
 
-        if destfile:
-            abs_destfile = os.path.abspath(destfile)
-
-            print("\nHash écrit dans {abs_destfile}\n".format(abs_destfile=abs_destfile))
-
-            with open(abs_destfile, "w") as f:
-                f.write(md5.hexdigest() + "\n")
-
-        else:
-            print() # faut une ligne vide pour espacer
-            print(md5.hexdigest())
+        return md5.hexdigest()
 
 
-    def md5_list(self, destfile: Optional[str], include_hidden: bool) -> None:
-        """Ècrit la liste des éléments d'un répertoire avec les sommes md5 associées, soit sur
-        la sortie standard soit dans un fichier.
+    def md5_list(self, include_hidden: bool=False) -> HashList:
+        """Retourne la liste des éléments d'un répertoire avec les sommes md5 associées.
         """
         hashlist = HashList(self.dirpath)
 
@@ -174,12 +158,7 @@ class Directory:
 
             hashlist.add((relfilepath, md5))
 
-        if destfile:
-            hashlist.write_file(destfile)
-        else:
-            print("\nListe des sommes md5 de {dirpath}\n".format(dirpath=self.dirpath))
-            for line in hashlist.lines():
-                print(line)
+        return hashlist
 
 
     def _get_filepaths(self, include_hidden: bool) -> Generator[Tuple[str, str], None, None]:
@@ -220,30 +199,52 @@ sous-dossiers.""")
 @click.option("--outfile", "-o", help="Écrit le résultat dans un fichier.")
 @click.option("--include_hidden", "-h", is_flag=True, help="Inclus les fichiers cachés")
 def md5(dirpath: str, unique: bool, outfile: Optional[str]=None, include_hidden: bool=False) -> None:
-    """Retourne soit la somme md5 de tous les fichiers inclus dans le dossier, soit un fichier
-    texte comprenant les sommes md5 de tous les fichiers inclus dans le dossier.
+    """Retourne la somme md5 de chacun des fichiers et sous-dossiers inclus dans le dossier ´dirpath´. Avec ´--unique´ ou ´-u´, retourne une seule somme md5 pour tout le contenu d'un répertoire.
     """
 
     if not os.path.isdir(dirpath):
-        raise Exception("{dirpath} n'est pas un répertoire valide".format(dirpath))
+        print("N'est pas un répertoire: {dirpath}".format(dirpath))
 
     if not unique:
-        Directory(dirpath).md5_list(outfile, include_hidden)
+        hashlist = Directory(dirpath).md5_list(include_hidden)
+        if outfile:
+            hashlist.write_file(outfile)
+        else:
+            print("\nListe des sommes md5 de {dirpath}".format(dirpath=dirpath))
+            for line in hashlist.lines():
+                print(line)
 
     else:
-        Directory(dirpath).md5(outfile, include_hidden)
+        md5_digest = Directory(dirpath).md5(include_hidden)
+        if outfile:
+            with open(outfile, "w") as f:
+                f.write("{}\n".format(md5_digest))
+        else:
+            print("Somme md5 du contenu de {}:".format(dirpath))
+            print(md5_digest)
 
 
-@cli.command(short_help="Comparer deux fichiers de sommes md5 calculés par la commande 'md5'")
-@click.argument("filepath1")
-@click.argument("filepath2")
-def compare(filepath1: str, filepath2: str) -> None:
-    """Compare deux fichiers de sommes md5 calculés par '{appname} md5'.
-    """.format(appname=APPNAME)
+@cli.command(short_help="Comparer les sommes md5 de deux répertoires.")
+@click.argument("dirpath1")
+@click.argument("dirpath2")
+@click.option("--unique", "-u", is_flag=True, help="""Compare la somme md5 de l'ensemble des
+fichiers, plutôt que de comparer les sommes md5 de chaque fichier contenu dans le dossier et les
+sous-dossiers.""")
+@click.option("--outfile", "-o", help="Écrit le résultat dans un fichier.")
+def compare(dirpath1: str, dirpath2: str, unique: bool=False, outfile: str=None) -> None:
+    """Compare les sommes md5 du contenu de deux répertoires. Avec ´--unique´ ou ´-u´, ne génère qu'une somme md5 pour chaque répertoire comparé.
+    """
 
-    first = HashList()
-    first.read_file(filepath1)
-    first.compare(filepath2)
+    first = Directory(dirpath1).md5_list()
+    second = Directory(dirpath2).md5_list()
+
+    comp = first.compare(second)
+
+    if outfile:
+        with open(outfile, "w") as f:
+            f.write(comp)
+    else:
+        print(comp)
 
 
 if __name__ == "__main__":
