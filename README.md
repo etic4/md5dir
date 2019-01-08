@@ -26,7 +26,6 @@ Pour comparer les sommes md5 du contenu de deux répertoires:
 
     md5dir compare chemin/du/répertoire autre/chemin
 
-
 L'aide et les options:
 
     md5dir --help
